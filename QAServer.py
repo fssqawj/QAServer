@@ -6,10 +6,13 @@ import tornado.options
 import tornado.web
 import tornado.gen
 import requests
+import time
+# from dbtools import *
 from tornado.concurrent import run_on_executor
 from concurrent.futures import ThreadPoolExecutor
-from htmlprocessor import process
+from htmlprocessor import *
 from tornado.options import define, options
+from score import *
 import sys
 reload(sys)
 sys.setdefaultencoding("utf-8")
@@ -21,7 +24,7 @@ header = {
 }
 
 
-define("port", default=18888, help="run on the given port", type=int)
+define("port", default=18887, help="run on the given port", type=int)
 
 
 class SolverHandler(tornado.web.RequestHandler):
@@ -39,17 +42,27 @@ class SolverHandler(tornado.web.RequestHandler):
     @run_on_executor
     def gethtml(self, p):
         # url = 'http://baike.baidu.com/search/none?word={}&enc=utf8'.format(p)
-        url = 'http://zhidao.baidu.com/search?word={}'.format(p)
-        r = requests.get(url, headers=header, timeout=12999)
-        r.encoding = "gbk"
-        open('tem.txt', 'w').write(r.text)
-        titles, answers = process(r.text)
+        # url_baidu = 'http://zhidao.baidu.com/search?word={}'.format(p)
+        # r = requests.get(url, headers=header, timeout=12999)
+        # r.encoding = "gbk"
+        # open('tem.txt', 'w').write(r.text)
+        # titles, answers = process_baidu(r.text)
+        titles, answers, scores = [], [], []
+        process_baidu(p, titles, answers, scores)
+        process_sina(p, titles, answers, scores)
+        process_360(p, titles, answers, scores)
+        # process_sougou(p, titles, answers, scores)
+        process_zhihu(p, titles, answers, scores)
+
+        titles, answers, scores = candidate_sort(p, titles, answers, scores)
+        self.set_header("Access-Control-Allow-Origin", "*")
         resp = ""
-        for i in range(0, len(titles)):
+        for i in range(1):
             if i >= len(answers):
                 break
-            title, answer = titles[i], answers[i]
-            resp += title + "</br>" + answer + "</br>"
+            title, answer, score = titles[i], answers[i], scores[i]
+            # insert_qapair(title, answer, time.time(), p, str(i))
+            resp += title + "</br>" + answer + "</br>" + score + "</br>"
         return resp
         # return answers[0]
 
