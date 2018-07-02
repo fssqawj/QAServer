@@ -5,7 +5,7 @@ QA Server Based Chinese CQA Site
 It is a QA Server based Chinese CQA Site, you can ask a question and the system return the similar question and answer pairs.
 
 ## Usage
-Server Down!!!
+
 Return format:
 ```
 如果你问任何问题男的都很愿意回答你，是想表达什... 
