@@ -1,6 +1,7 @@
 # coding: utf-8
-import requests
 from bs4 import BeautifulSoup
+from htmlfetch import fetch_pages_in_loop
+from score import candidate_sort
 
 
 header = {
@@ -10,6 +11,14 @@ header = {
 }
 
 max_fetch_cnt = 3
+
+urls = ['http://zhidao.baidu.com/search?word={}',
+        'http://www.sogou.com/sogou?query={}&insite=wenwen.sogou.com',
+        'http://iask.sina.com.cn/search?searchWord={}&record=1',
+        'http://wenda.so.com/search/?q={}',
+        'https://www.zhihu.com/search?q={}']
+
+encodings = ['gbk', 'utf-8', 'utf-8', 'utf-8', 'utf-8']
 
 
 def process_baidu(content, titles, answers, scores):
@@ -35,7 +44,7 @@ def process_sina(content, titles, answers, scores):
 
 
 def process_360(content, titles, answers, scores):
-    soup = BeautifulSoup(content.decode('utf-8'))
+    soup = BeautifulSoup(content)
     titles_360 = soup.select('div.qa-i-hd')
     answers_360 = soup.select('div.qa-i-bd')
     titles += [x.get_text() for x in titles_360][:min(max_fetch_cnt, len(titles_360))]
@@ -61,14 +70,18 @@ def process_zhihu(content, titles, answers, scores):
     scores += ['Zhihu' for _ in titles_zhihu][:min(max_fetch_cnt, len(titles_zhihu))]
 
 
-def process_test():
-    url = 'http://zhidao.baidu.com/question/1446465410952140860.html'
-    r = requests.get(url, headers=header, timeout=12999, verify=False)
-    r.encoding = "gbk"
-
-    soup = BeautifulSoup(r.text)
-    print(soup.pre)
+def process_community_site(crawler_worker_loop, query):
+    resources = fetch_pages_in_loop(crawler_worker_loop, [x.format(query) for x in urls])
+    # resources = fetch_pages(urls)
+    titles, answers, scores = [], [], []
+    process_baidu(resources[0], titles, answers, scores)
+    # process_sina(resources[0], titles, answers, scores)
+    process_360(resources[3], titles, answers, scores)
+    process_sougou(resources[1], titles, answers, scores)
+    process_zhihu(resources[4], titles, answers, scores)
+    print(titles, answers, scores)
+    return candidate_sort(query, titles, answers, scores)
 
 
 if __name__ == '__main__':
-    process_test()
+    pass

@@ -2,6 +2,8 @@
 import aiohttp
 import asyncio
 import async_timeout
+from threading import Thread
+import requests
 
 header = {
     'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 '
@@ -10,23 +12,30 @@ header = {
 }
 
 
-async def downloader(session, url, time_out=10):
+async def downloader(loop, url, time_out=10):
     with async_timeout.timeout(time_out):
-        async with session.get(url, headers=header) as response:
-            content = await response.content.read()
-            return content
+        async with aiohttp.ClientSession(loop=loop) as session:
+            async with session.get(url, headers=header) as response:
+                content = await response.content.read()
+                return content
 
 
-async def runner(loop, urls):
-    async with aiohttp.ClientSession(loop=loop) as session:
-        tasks = [downloader(session, url) for url in urls]
-        return await asyncio.gather(*tasks)
+def fetch_pages_in_loop(loop, urls):
+    feature_works = [fetch_page(loop, url) for url in urls]
+    return [res_run.result() for res_run in feature_works]
+
+
+def fetch_page(loop, url):
+    return asyncio.run_coroutine_threadsafe(downloader(loop, url), loop)
+
+
+def start_crawler_worker(loop):
+    asyncio.set_event_loop(loop)
+    loop.run_forever()
 
 
 def fetch_pages(urls):
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    return loop.run_until_complete(runner(loop, urls))
+    return [requests.get(url, headers=header).text for url in urls]
 
 
 if __name__ == '__main__':
@@ -34,7 +43,10 @@ if __name__ == '__main__':
             'http://wenwen.sogou.com/s/?w={}',
             'http://iask.sina.com.cn/search?searchWord={}',
             'http://wenda.so.com/search/?q={}',
-            'https://www.zhihu.com/search?q={}',
-            ]
-    encodings = ['gbk', 'utf-8', 'utf-8', 'utf-8', 'utf-8']
-    print(fetch_pages(urls))
+            'https://www.zhihu.com/search?q={}']
+    # encodings = ['gbk', 'utf-8', 'utf-8', 'utf-8', 'utf-8']
+    # print(fetch_pages(urls))
+    crawler_worker_loop = asyncio.new_event_loop()
+    Thread(target=start_crawler_worker, args=(crawler_worker_loop,)).start()
+    res = fetch_pages_in_loop(crawler_worker_loop, urls)
+    print(len(res), res)
