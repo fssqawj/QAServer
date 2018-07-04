@@ -10,7 +10,7 @@ from tornado.concurrent import run_on_executor
 from concurrent.futures import ThreadPoolExecutor
 from htmlprocessor import process_community_site
 from tornado.options import define, options
-from htmlfetch import start_crawler_worker
+from parser.htmlfetch import start_crawler_worker
 
 
 define("port", default=18887, help="run on the given port", type=int)
@@ -37,8 +37,7 @@ class SolverHandler(tornado.web.RequestHandler):
         self.set_header("Access-Control-Allow-Origin", "*")
         resp = ""
         for item in search_results:
-            title, answer, score = item
-            resp += title + "</br>" + answer + "</br>" + score + "</br>"
+            resp += item.question + "</br>" + item.best_answer + "</br>" + item.source + "</br>"
         return resp
 
 
