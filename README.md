@@ -1,10 +1,15 @@
 # QAServer
-QA Server Based Chinese CQA Site
+This is a tornado based http server crawled many Chinese community site for community question answering.
 
 ## Overview
 It is a QA Server based Chinese CQA Site, you can ask a question and the system return the similar question and answer pairs.
 
 ## Usage
+
+`python QAserver.py`
+
+`http://localhost:18887/proxy?p=any_question`
+
 
 Return format:
 ```
@@ -22,8 +27,5 @@ Baidu
 ## Future Work
 Use the domain knowledge graph, address the question more specific.
 
-## Mention
-Thank CKBoss(God.Q), provide the tornado templete.
-
 ## Connect
-ICA fssqawj fssqawj@gmail.com
+fssqawj fssqawj[AT]gmail[DOT]com
