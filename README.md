@@ -2,7 +2,7 @@
 This is a tornado based http server crawled many Chinese community site for community question answering.
 
 ## Overview
-It is a QA Server based Chinese CQA Site, you can ask a question and the system return the similar question and answer pairs.
+You can ask a question and the system return the similar question and answer pairs.
 
 ## Usage
 
