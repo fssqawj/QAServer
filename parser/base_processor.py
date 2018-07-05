@@ -2,27 +2,40 @@
 from parser.htmlfetch import fetch_page
 
 
+class JobWorker:
+    def __init__(self, worker, url):
+        self.worker = worker
+        self.url = url
+
+
 class BaseProcessor:
     def __init__(self):
         self.base_url = None
+        self.summary_urls = []
         self.detail_urls = []
         self.crawler_worker_loop = None
-        self.summary_worker = None
+        self.summary_workers = None
         self.detail_workers = []
         self.summary_candidates = []
         self.detail_candidates = []
 
     def submit_summary_job(self, query):
-        self.summary_worker = fetch_page(self.crawler_worker_loop, self.base_url.format(query))
+        print(self.summary_urls)
+        self.summary_workers = [JobWorker(fetch_page(self.crawler_worker_loop, summary_url.format(query)),
+                                          summary_url.format(query)) for summary_url in self.summary_urls]
 
     def submit_detail_jobs(self):
-        self.detail_workers = [fetch_page(self.crawler_worker_loop, detail_url) for detail_url in self.detail_urls]
+        self.detail_workers = [JobWorker(fetch_page(self.crawler_worker_loop, detail_url), detail_url)
+                               for detail_url in self.detail_urls]
 
-    def get_summary_result(self):
-        return self.summary_worker.result()
+    def submit_job(self, url):
+        return JobWorker(fetch_page(self.crawler_worker_loop, url), url)
 
-    def get_detail_results(self):
-        return [detail_worker.result() for detail_worker in self.detail_workers]
+    def get_summary_workers(self):
+        return self.summary_workers
+
+    def get_detail_workers(self):
+        return self.detail_workers
 
     def extract_summary(self):
         pass

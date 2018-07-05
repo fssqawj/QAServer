@@ -1,7 +1,10 @@
 # coding: utf-8
 from parser.base_processor import BaseProcessor
-from bs4 import BeautifulSoup
-from cqa.cqa_meta import CqaMeta
+import asyncio
+from threading import Thread
+import json
+from cqa import CqaMeta
+from parser.htmlfetch import start_crawler_worker
 
 
 class ZhihuProcessor(BaseProcessor):
@@ -9,23 +12,30 @@ class ZhihuProcessor(BaseProcessor):
         super().__init__()
         self._max_fetch_cnt = max_fetch_cnt
         self.crawler_worker_loop = crawler_worker_loop
-        self.base_url = 'https://www.zhihu.com/search?q={}'
+        self.base_url = 'https://www.zhihu.com/api/v4/search_v3?' \
+                        't=general&q={}&correction=1&offset=0&search_hash_id=87899&limit='
+        self.summary_urls = [self.base_url + str(max_fetch_cnt)]
         self._source = 'Zhihu'
 
-    def extract_summary(self):
-        soup = BeautifulSoup(self.get_summary_result(), 'lxml')
-        titles = soup.select('h2.ContentItem-title')
-        answers = soup.select('div.RichContent.Highlight.is-collapsed')
-        for idx, title in enumerate(titles):
-            if idx >= len(answers) or idx >= self._max_fetch_cnt:
-                break
-            cqa = CqaMeta().set_question(title.get_text())\
-                .set_best_answer(answers[idx].get_text())\
-                .set_source(self._source)
-            self.summary_candidates.append(cqa)
+    def extract_summary(self, fetch_detail=False):
+        for item in self.get_summary_workers():
+            json_res = json.loads(item.worker.result())
+            print(json_res)
 
-            self.detail_urls.append(title.a['href'])
+            for tag in json_res['data']:
+                if tag['type'] == 'search_result':
+                    self.summary_candidates.append(CqaMeta(item.url).set_question(tag['highlight']['title'])
+                                                   .set_best_answer(tag['highlight']['description'])
+                                                   .set_source(self.base_url))
         return self.summary_candidates
 
     def extract_details(self):
         raise NotImplementedError
+
+
+if __name__ == '__main__':
+    crawler_worker_loop = asyncio.new_event_loop()
+    Thread(target=start_crawler_worker, args=(crawler_worker_loop,)).start()
+    pro = ZhihuProcessor(crawler_worker_loop)
+    pro.submit_summary_job('华东师范大学在什么地方')
+    pro.extract_summary()

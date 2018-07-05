@@ -37,7 +37,7 @@ class SolverHandler(tornado.web.RequestHandler):
         self.set_header("Access-Control-Allow-Origin", "*")
         resp = ""
         for item in search_results:
-            resp += item.question + "</br>" + item.best_answer + "</br>" + item.source + "</br>"
+            resp += item.to_json() + '</br>'
         return resp
 
 

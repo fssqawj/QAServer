@@ -22,7 +22,7 @@ Baidu
 * Sina
 * 360
 * Zhihu
-* Sougou  
+* Sougou
 
 ## Future Work
 Use the domain knowledge graph, address the question more specific.
