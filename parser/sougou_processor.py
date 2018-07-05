@@ -15,12 +15,14 @@ class SougouProcessor(BaseProcessor):
         self._source = 'Sougou'
 
     def extract_summary(self, fetch_detail=False):
+        total_idx = 0
         for item in self.get_summary_workers():
             soup = BeautifulSoup(item.worker.result(), 'lxml')
             cards = soup.select('div.vrwrap')
             for idx, card in enumerate(cards):
-                if idx >= self._max_fetch_cnt:
+                if total_idx >= self._max_fetch_cnt:
                     break
+                total_idx += 1
                 cqa = CqaMeta(item.url).set_question(card.select_one('h3.vrTitle').get_text().replace('- 搜狗问问', '').replace('_搜狗问问', '').strip())\
                     .set_best_answer(card.select('div.str-text-info')[-1].get_text().replace('最佳答案', '').strip())\
                     .set_source(self._source)

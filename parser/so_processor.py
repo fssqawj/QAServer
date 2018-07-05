@@ -15,13 +15,15 @@ class SoProcessor(BaseProcessor):
         self._source = '360'
 
     def extract_summary(self, fetch_detail=False):
+        total_idx = 0
         for item in self.get_summary_workers():
             soup = BeautifulSoup(item.worker.result(), 'lxml')
             titles = soup.select('div.qa-i-hd')
             answers = soup.select('div.qa-i-bd')
             for idx, title in enumerate(titles):
-                if idx >= len(answers) or idx >= self._max_fetch_cnt:
+                if idx >= len(answers) or total_idx >= self._max_fetch_cnt:
                     break
+                total_idx += 1
                 cqa = CqaMeta(item.url).set_question(title.get_text())\
                     .set_best_answer(answers[idx].get_text())\
                     .set_source(self._source)
