@@ -2,6 +2,7 @@
 from parser.base_processor import BaseProcessor
 from bs4 import BeautifulSoup
 from cqa.cqa_meta import CqaMeta
+from wrapper import timer
 
 
 class SoProcessor(BaseProcessor):
@@ -14,6 +15,7 @@ class SoProcessor(BaseProcessor):
         self.summary_urls = [self.base_url + str(x) for x in self.page_num]
         self._source = '360'
 
+    @timer
     def extract_summary(self, fetch_detail=False):
         total_idx = 0
         for item in self.get_summary_workers():

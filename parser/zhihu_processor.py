@@ -5,6 +5,7 @@ from threading import Thread
 import json
 from cqa import CqaMeta
 from parser.htmlfetch import start_crawler_worker
+from wrapper import timer
 
 
 class ZhihuProcessor(BaseProcessor):
@@ -17,10 +18,10 @@ class ZhihuProcessor(BaseProcessor):
         self.summary_urls = [self.base_url + str(max_fetch_cnt)]
         self._source = 'Zhihu'
 
+    @timer
     def extract_summary(self, fetch_detail=False):
         for item in self.get_summary_workers():
             json_res = json.loads(item.worker.result())
-            print(json_res)
 
             for tag in json_res['data']:
                 if tag['type'] == 'search_result':

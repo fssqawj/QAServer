@@ -1,4 +1,5 @@
 # coding: utf-8
+from wrapper import timer
 
 
 class Processor:
@@ -9,11 +10,13 @@ class Processor:
         self._processors.append(processor)
         return self
 
+    @timer
     def start_summary_jobs(self, query):
         for processor in self._processors:
             processor.submit_summary_job(query)
         return self
 
+    @timer
     def fetch_summary_results(self, query):
         self.start_summary_jobs(query)
         summary_candidates = []

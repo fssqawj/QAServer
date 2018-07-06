@@ -20,7 +20,6 @@ class BaseProcessor:
         self.detail_candidates = []
 
     def submit_summary_job(self, query):
-        print(self.summary_urls)
         self.summary_workers = [JobWorker(fetch_page(self.crawler_worker_loop, summary_url.format(query)),
                                           summary_url.format(query)) for summary_url in self.summary_urls]
 
@@ -42,4 +41,3 @@ class BaseProcessor:
 
     def extract_details(self):
         pass
-
