@@ -1,6 +1,7 @@
 # coding: utf-8
 from parser import BaseProcessor
 import json
+from bs4 import BeautifulSoup
 from wrapper import timer
 
 
@@ -30,4 +31,8 @@ class CaixinProcessor(BaseProcessor):
         return self.summary_candidates
 
     def extract_details(self):
-        raise NotImplementedError
+        for item in self.get_detail_workers():
+            soup = BeautifulSoup(item.worker.result(), 'lxml')
+            self.detail_candidates.append({'title': soup.select_one('h1').text,
+                                           'content': soup.select_one('div.textbox').text})
+        return self.detail_candidates

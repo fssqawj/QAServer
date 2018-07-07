@@ -2,4 +2,5 @@
 from news import run
 
 if __name__ == '__main__':
-    run()
+    data_dir = './newsdata'
+    run(data_dir)
