@@ -12,7 +12,7 @@ header = {
 }
 
 
-async def downloader(loop, url, time_out=10):
+async def downloader(loop, url, time_out=100):
     with async_timeout.timeout(time_out):
         async with aiohttp.ClientSession(loop=loop) as session:
             async with session.get(url, headers=header) as response:
