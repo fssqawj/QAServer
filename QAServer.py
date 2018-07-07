@@ -10,7 +10,7 @@ from tornado.concurrent import run_on_executor
 from concurrent.futures import ThreadPoolExecutor
 from htmlprocessor import process_community_site
 from tornado.options import define, options
-from parser.htmlfetch import start_crawler_worker
+from parser import start_crawler_worker
 
 
 define("port", default=18887, help="run on the given port", type=int)

@@ -1,5 +1,5 @@
 # coding: utf-8
-from parser.base_processor import BaseProcessor
+from parser import BaseProcessor
 import json
 from wrapper import timer
 
