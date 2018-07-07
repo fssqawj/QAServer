@@ -3,10 +3,11 @@ from parser import BaseProcessor
 import json
 from bs4 import BeautifulSoup
 from wrapper import timer
+from utils import create_path
 
 
-class CaixinProcessor(BaseProcessor):
-    def __init__(self, crawler_worker_loop, start=0, max_fetch_cnt=50):
+class CaiXinProcessor(BaseProcessor):
+    def __init__(self, crawler_worker_loop, path, start=0, max_fetch_cnt=50):
         super().__init__()
         self._max_fetch_cnt = max_fetch_cnt
         self._start = start
@@ -19,7 +20,12 @@ class CaixinProcessor(BaseProcessor):
         self.comment_url = 'http://file.c.caixin.com/comment-sync/js/100/{}/{}.js'
         self.summary_urls = [self.base_url.format(str(channel), self._start, self._max_fetch_cnt)
                              for _, channel in self.channels.items()]
+        self._path = path
+        self.summary_saved_file = self._path + '/summary_{}.txt'
+        self.detail_saved_file = self._path + '/detail_{}.txt'
         self._source = 'Caixin'
+
+        create_path(self._path)
 
     @timer
     def extract_summary(self, fetch_detail=False):
@@ -46,3 +52,10 @@ class CaixinProcessor(BaseProcessor):
                                            'content': soup.select_one('div.textbox').text,
                                            'comments': user_comments})
         return self.detail_candidates
+
+    def add_detail_url(self, item):
+        self.detail_urls.append(item['link'])
+
+    @staticmethod
+    def judge_in_this_day(day, item):
+        return day in item['time']

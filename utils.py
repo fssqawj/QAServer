@@ -1,4 +1,5 @@
 # coding: utf-8
+import os
 
 
 def is_lower_alpha(x):
@@ -22,3 +23,8 @@ def is_punctuation_or_unreadable(x):
                 or is_number(x)
                 or is_upper_alpha(x)
                 or is_simply_chinese(x))
+
+
+def create_path(path):
+    if not os.path.exists(path):
+        os.makedirs(path)
