@@ -16,6 +16,7 @@ class CaixinProcessor(BaseProcessor):
         self.base_url = 'http://tag.caixin.com/news/homeInterface.jsp?' \
                         'channel={}&start={}&count={}&picdim=_145_97' \
                         '&callback=jQuery17209677058548357216_1530938601322&_=1530938933631'
+        self.comment_url = 'http://file.c.caixin.com/comment-sync/js/100/{}/{}.js'
         self.summary_urls = [self.base_url.format(str(channel), self._start, self._max_fetch_cnt)
                              for _, channel in self.channels.items()]
         self._source = 'Caixin'
@@ -30,9 +31,18 @@ class CaixinProcessor(BaseProcessor):
                 self.summary_candidates.append(obj)
         return self.summary_candidates
 
+    @timer
     def extract_details(self):
         for item in self.get_detail_workers():
+            passage_id = item.url[-14:-5]
             soup = BeautifulSoup(item.worker.result(), 'lxml')
+            comments = self.submit_job(self.comment_url.format(passage_id[-3:], passage_id))\
+                .worker.result().decode('utf-8')
+            comments = json.loads(comments[comments.index('{'):comments.rindex('}') + 1])
+            user_comments = []
+            for comment in comments['list']:
+                user_comments.append(comment['content'])
             self.detail_candidates.append({'title': soup.select_one('h1').text,
-                                           'content': soup.select_one('div.textbox').text})
+                                           'content': soup.select_one('div.textbox').text,
+                                           'comments': user_comments})
         return self.detail_candidates
