@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 .idea/
 newsdata/
+data/
 
 # C extensions
 *.so

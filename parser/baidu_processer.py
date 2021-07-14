@@ -49,10 +49,12 @@ class BaiduProcessor(BaseProcessor):
                     best_answer_tag = soup.select_one('pre.best-text.mb-10')
                     if best_answer_tag is None:
                         best_answer_tag = soup.select_one('div.best-text.mb-10')
-                    cqa = CqaMeta(item.url).set_question(soup.select_one('span.ask-title'))\
+                    cqa = CqaMeta(item.url)\
+                        .set_question(soup.select_one('span.ask-title'))\
                         .set_description(soup.select_one('span.con'))\
                         .set_best_answer(best_answer_tag)\
-                        .set_update_time(soup.select_one('span.grid-r.f-aid.pos-time.answer-time.f-pening'))\
+                        .set_update_time(soup.select_one(
+                            'span.grid-r.f-aid.pos-time.answer-time.f-pening'))\
                         .set_source(self._source)\
                         .set_candidates(candidate_answers)
                 self.detail_candidates.append(cqa)
@@ -62,5 +64,6 @@ class BaiduProcessor(BaseProcessor):
 
     @staticmethod
     def extract_baike_page(soup, url):
-        return CqaMeta(url).set_question(soup.select_one('dd.lemmaWgt-lemmaTitle-title'))\
+        return CqaMeta(url)\
+            .set_question(soup.select_one('dd.lemmaWgt-lemmaTitle-title'))\
             .set_best_answer(soup.select_one('div.lemma-summary'))

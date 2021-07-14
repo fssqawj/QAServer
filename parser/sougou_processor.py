@@ -1,4 +1,8 @@
 # coding: utf-8
+import asyncio
+from threading import Thread
+
+from parser.htmlfetch import start_crawler_worker
 from parser.base_processor import BaseProcessor
 from bs4 import BeautifulSoup
 from cqa.cqa_meta import CqaMeta
@@ -35,3 +39,12 @@ class SougouProcessor(BaseProcessor):
 
     def extract_details(self):
         raise NotImplementedError
+
+
+if __name__ == '__main__':
+    crawler_worker_loop = asyncio.new_event_loop()
+    Thread(target=start_crawler_worker, args=(crawler_worker_loop,)).start()
+    pro = SougouProcessor(crawler_worker_loop)
+    pro.submit_summary_job('华东师范大学在什么地方')
+    print(pro.extract_summary())
+    crawler_worker_loop.stop()

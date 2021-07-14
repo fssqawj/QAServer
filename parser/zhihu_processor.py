@@ -13,16 +13,19 @@ class ZhihuProcessor(BaseProcessor):
         super().__init__()
         self._max_fetch_cnt = max_fetch_cnt
         self.crawler_worker_loop = crawler_worker_loop
-        self.base_url = 'https://www.zhihu.com/api/v4/search_v3?' \
-                        't=general&q={}&correction=1&offset=0&search_hash_id=87899&limit='
+        # self.base_url = 'https://www.zhihu.com/api/v4/search_v3?' \
+        #                 't=general&q={}&correction=1&offset=0&limit=20&' \
+        #                 'filter_fields = & lc_idx = 0 & show_all_topics = 0'、
+        self.base_url = 'https://www.zhihu.com/search?type=content&q={}'
         self.summary_urls = [self.base_url + str(max_fetch_cnt)]
         self._source = 'Zhihu'
 
     @timer
     def extract_summary(self, fetch_detail=False):
         for item in self.get_summary_workers():
+            print(item.worker.result().decode('utf-8'))
             json_res = json.loads(item.worker.result())
-
+            print(json_res)
             for tag in json_res['data']:
                 if tag['type'] == 'search_result':
                     self.summary_candidates.append(CqaMeta(item.url).set_question(tag['highlight']['title'])
